@@ -20,7 +20,7 @@ const getModelByRole = (role) => {
 
 /*------------------------------------------------- SignUp --------------------------------------------------*/
 const signUp = async (req, res) => {
-    const {name, email, password, confirmPassword, role } = req.body;
+    const { name, email, password, confirmPassword, role } = req.body;
     console.log(email, password, confirmPassword, role);
 
     if (!name || !email || !password || !confirmPassword) {
@@ -75,10 +75,10 @@ const signUp = async (req, res) => {
         });
     }
 };
+
 /*------------------------------------------------- SignIn --------------------------------------------------*/
 const comparePasswords = async (plainPassword, hashedPassword) => {
     try {
-        // Use bcrypt to compare passwords
         const isMatch = await bcrypt.compare(plainPassword, hashedPassword);
         return isMatch;
     } catch (error) {
@@ -86,6 +86,7 @@ const comparePasswords = async (plainPassword, hashedPassword) => {
         return false; // Return false in case of error or mismatch
     }
 };
+
 const signIn = async (req, res) => {
     const { email, password, role } = req.body;
     console.log(email, password);
@@ -124,9 +125,8 @@ const signIn = async (req, res) => {
             });
         }
 
-        // manually compare passwords inside the if statement
         const hashedPassword = user.password; // Assuming user.password contains the hashed password
-        const isPasswordValid = comparePasswords(password, hashedPassword);
+        const isPasswordValid = await comparePasswords(password, hashedPassword); // Await here
 
         if (!isPasswordValid) {
             return res.status(400).json({
@@ -135,35 +135,28 @@ const signIn = async (req, res) => {
             });
         }
 
-        /*const tokenPayload = {
-            id: user._id,
-            role: user.role,
-        };*/
-
-        // Different secret key for admin
-        /*const secretKey = userRole === 'admin' ? process.env.ADMIN_SECRET_KEY : process.env.SECRET_KEY;*/
-
         const token = user.generateJWT();
 
-    res.cookie('token', token, { httpOnly: true });
-    return res.status(200).json({
-      success: true,
-      message: 'Successfully signed in',
-      token,
-      user: {
-        id: user._id,
-        email: user.email,
-        role: user.role,
-      },
-    });
-  } catch (error) {
-    console.error('Error during sign in:', error);
-    return res.status(400).json({
-      success: false,
-      message: 'Invalid email or password',
-    });
-  }
+        res.cookie('token', token, { httpOnly: true });
+        return res.status(200).json({
+            success: true,
+            message: 'Successfully signed in',
+            token,
+            user: {
+                id: user._id,
+                email: user.email,
+                role: user.role,
+            },
+        });
+    } catch (error) {
+        console.error('Error during sign in:', error);
+        return res.status(400).json({
+            success: false,
+            message: 'Invalid email or password',
+        });
+    }
 };
+
 /*------------------------------------------------- Forgot Password --------------------------------------------------*/
 
 const forgotPassword = async (req, res) => {

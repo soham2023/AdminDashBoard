@@ -3,6 +3,7 @@ const WinterSetProduct = require('../models/WinterSetProduct');
 const JeansProduct = require('../models/JeansProduct');
 const TShirtProduct = require('../models/TShirtProduct');
 const Upload = require('../helpers/upload');
+const Product = require('../models/Product')
 const { generateCustomId } = require("../helpers/uuid");
 
 // Create a new product
